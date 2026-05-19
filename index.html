@@ -1,0 +1,1963 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kall CS | Member & Reservation Console</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --surface: #ffffff;
+      --surface-soft: rgba(255,255,255,.82);
+      --text: #0f172a;
+      --muted: #64748b;
+      --subtle: #94a3b8;
+      --border: rgba(100,116,139,.24);
+      --border-strong: rgba(51,65,85,.24);
+      --primary: #2563eb;
+      --primary-strong: #1d4ed8;
+      --violet: #7c3aed;
+      --cyan: #06b6d4;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --radius: 18px;
+      --radius-sm: 12px;
+      --shadow: 0 24px 70px rgba(15,23,42,.12);
+      --shadow-soft: 0 12px 32px rgba(15,23,42,.08);
+      --ease: cubic-bezier(.16,1,.3,1);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(37,99,235,.13), transparent 32rem),
+        radial-gradient(circle at 92% 2%, rgba(124,58,237,.13), transparent 34rem),
+        linear-gradient(180deg, #f8fafc 0%, #ffffff 44%, #f6f8fc 100%);
+      font-family: "Pretendard Variable", Pretendard, "SUIT", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+      letter-spacing: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { border: 0; cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    a { color: inherit; text-decoration: none; }
+    .hidden { display: none !important; }
+    :focus-visible { outline: 3px solid rgba(37,99,235,.24); outline-offset: 2px; }
+
+    .login-view {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(340px, 480px) 1fr;
+    }
+
+    .login-panel {
+      display: grid;
+      align-content: center;
+      padding: 44px;
+      background: rgba(255,255,255,.92);
+      border-right: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+    }
+
+    .login-card { max-width: 380px; }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 26px;
+      font-weight: 950;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 28% 18%, rgba(255,255,255,.34), transparent 32%),
+        linear-gradient(135deg, var(--primary), var(--violet));
+      box-shadow: 0 18px 36px rgba(37,99,235,.24);
+    }
+
+    .login-card h1 {
+      margin: 0 0 10px;
+      font-size: 32px;
+      line-height: 1.12;
+      letter-spacing: -.045em;
+    }
+
+    .login-card p {
+      margin: 0 0 26px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-weight: 680;
+    }
+
+    .login-visual {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      padding: 40px;
+      background:
+        radial-gradient(circle at 64% 32%, rgba(34,211,238,.24), transparent 30rem),
+        linear-gradient(135deg, #0f172a, #1e3a8a 54%, #6d28d9);
+    }
+
+    .login-visual-card {
+      width: min(620px, 92%);
+      padding: 30px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 34px;
+      color: #fff;
+      background: rgba(255,255,255,.12);
+      box-shadow: 0 38px 100px rgba(0,0,0,.26);
+      backdrop-filter: blur(24px);
+    }
+
+    .login-visual-card h2 {
+      margin: 0 0 12px;
+      font-size: clamp(34px, 6vw, 60px);
+      line-height: 1.02;
+      letter-spacing: -.055em;
+    }
+
+    .login-visual-card p {
+      max-width: 520px;
+      margin: 0 0 24px;
+      color: rgba(255,255,255,.76);
+      font-size: 17px;
+      font-weight: 680;
+      line-height: 1.65;
+    }
+
+    .visual-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .visual-metric {
+      min-height: 112px;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 22px;
+      background: rgba(255,255,255,.1);
+    }
+
+    .visual-metric strong { display: block; font-size: 26px; letter-spacing: -.04em; }
+    .visual-metric span { color: rgba(255,255,255,.72); font-size: 13px; font-weight: 800; }
+
+    .field { display: grid; gap: 7px; margin-bottom: 14px; }
+    .field label {
+      color: #334155;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid rgba(148,163,184,.36);
+      border-radius: 14px;
+      background: #f8fafc;
+      color: var(--text);
+      outline: none;
+      transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease), background 160ms var(--ease);
+    }
+
+    input, select { height: 46px; padding: 0 13px; }
+    textarea { min-height: 116px; padding: 12px 13px; resize: vertical; line-height: 1.5; }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(37,99,235,.58);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(37,99,235,.1);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      font-weight: 920;
+      white-space: nowrap;
+      transition: transform 160ms var(--ease), box-shadow 160ms var(--ease), background 160ms var(--ease);
+    }
+
+    .btn:active { transform: scale(.985); }
+    .btn-primary { color: #fff; background: linear-gradient(135deg, var(--primary), var(--violet)); box-shadow: 0 18px 34px rgba(37,99,235,.22); }
+    .btn-dark { color: #fff; background: #0f172a; }
+    .btn-ghost { color: #334155; border: 1px solid var(--border); background: rgba(255,255,255,.82); }
+    .btn-danger { color: #b91c1c; border: 1px solid rgba(239,68,68,.28); background: #fff1f2; }
+    .btn-small { min-height: 32px; padding: 0 11px; font-size: 12px; }
+    .login-card .btn { width: 100%; height: 48px; margin-top: 6px; }
+
+    .login-error {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: #991b1b;
+      background: #fee2e2;
+      font-size: 13px;
+      font-weight: 820;
+      line-height: 1.45;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr) minmax(360px, 430px);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 22px;
+      border-right: 1px solid var(--border);
+      background: rgba(255,255,255,.78);
+      backdrop-filter: blur(20px);
+    }
+
+    .side-status {
+      margin: 20px 0;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: rgba(248,250,252,.74);
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .status-line + .status-line { margin-top: 9px; }
+    .dot {
+      width: 9px;
+      height: 9px;
+      display: inline-block;
+      margin-right: 7px;
+      border-radius: 999px;
+      background: var(--subtle);
+    }
+    .dot.live { background: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.14); }
+    .dot.error { background: #ef4444; box-shadow: 0 0 0 4px rgba(239,68,68,.13); }
+
+    .nav { display: grid; gap: 7px; }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 44px;
+      padding: 0 13px;
+      border-radius: 14px;
+      color: #475569;
+      background: transparent;
+      font-weight: 900;
+      text-align: left;
+    }
+    .nav-btn.active {
+      color: #fff;
+      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+      box-shadow: 0 16px 34px rgba(37,99,235,.22);
+    }
+    .nav-badge {
+      min-width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #1d4ed8;
+      background: #eff6ff;
+      font-size: 12px;
+      font-weight: 950;
+    }
+    .nav-btn.active .nav-badge { color: #fff; background: rgba(255,255,255,.18); }
+
+    .side-footer {
+      margin-top: auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .admin-card {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: rgba(248,250,252,.8);
+    }
+    .admin-card strong { display: block; margin-bottom: 3px; }
+    .admin-card span { color: var(--muted); font-size: 12px; font-weight: 800; }
+
+    .main {
+      min-width: 0;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .topbar h1 {
+      margin: 0 0 4px;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.05;
+      letter-spacing: -.055em;
+    }
+
+    .topbar p {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 720;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(150px, .7fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .metric-card, .panel, .table-card, .detail-panel {
+      border: 1px solid rgba(100,116,139,.28);
+      background:
+        radial-gradient(circle at var(--mx, 18%) var(--my, 10%), rgba(37,99,235,.08), transparent 32%),
+        rgba(255,255,255,.84);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+    }
+
+    .metric-card {
+      min-height: 128px;
+      padding: 18px;
+      border-radius: 22px;
+    }
+    .metric-card span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .metric-card strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 30px;
+      line-height: 1;
+      letter-spacing: -.05em;
+    }
+    .metric-card small {
+      display: block;
+      margin-top: 9px;
+      color: var(--muted);
+      font-weight: 780;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 14px;
+    }
+
+    .panel {
+      overflow: hidden;
+      border-radius: 24px;
+    }
+    .panel-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px;
+      border-bottom: 1px solid rgba(148,163,184,.18);
+    }
+    .panel-head h2, .panel-head h3 { margin: 0; letter-spacing: -.04em; }
+    .panel-head p { margin: 4px 0 0; color: var(--muted); font-size: 13px; font-weight: 760; }
+    .panel-body { padding: 16px 18px 18px; }
+
+    .table-card {
+      overflow: hidden;
+      border-radius: 24px;
+    }
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+    th, td {
+      padding: 13px 14px;
+      border-bottom: 1px solid rgba(148,163,184,.18);
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+    th {
+      color: #64748b;
+      background: rgba(248,250,252,.9);
+      font-size: 12px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    td strong { letter-spacing: -.02em; }
+    tr[data-row] { cursor: pointer; }
+    tr[data-row]:hover td { background: rgba(239,246,255,.62); }
+    tr.selected td { background: rgba(219,234,254,.72); }
+
+    .muted { color: var(--muted); }
+    .nowrap { white-space: nowrap; }
+    .truncate {
+      max-width: 320px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+    .badge.pending { color: #92400e; background: #fef3c7; }
+    .badge.progress { color: #1d4ed8; background: #dbeafe; }
+    .badge.confirmed { color: #15803d; background: #dcfce7; }
+    .badge.completed { color: #334155; background: #e2e8f0; }
+    .badge.cancelled { color: #b91c1c; background: #fee2e2; }
+    .badge.admin { color: #fff; background: linear-gradient(135deg, var(--primary), var(--violet)); }
+    .badge.staff { color: #1d4ed8; background: #dbeafe; }
+    .badge.user { color: #475569; background: #e2e8f0; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .cards-list { display: grid; gap: 10px; }
+    .queue-item {
+      display: grid;
+      gap: 7px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255,255,255,.82);
+      cursor: pointer;
+    }
+    .queue-item:hover { border-color: rgba(37,99,235,.4); box-shadow: 0 12px 28px rgba(37,99,235,.1); }
+    .queue-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .queue-item h4 { margin: 0; font-size: 14px; }
+    .queue-item p { margin: 0; color: var(--muted); font-size: 12px; font-weight: 760; line-height: 1.45; }
+
+    .detail-panel {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-width: 0 0 0 1px;
+      border-radius: 0;
+      background: rgba(255,255,255,.9);
+    }
+    .detail-empty {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 30px;
+      text-align: center;
+    }
+    .detail-empty h3 { margin: 0 0 8px; letter-spacing: -.04em; }
+    .detail-empty p { margin: 0; color: var(--muted); line-height: 1.55; font-weight: 700; }
+    .detail-head {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      padding: 22px;
+      border-bottom: 1px solid rgba(148,163,184,.18);
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(16px);
+    }
+    .detail-head h2 { margin: 8px 0 7px; font-size: 24px; line-height: 1.12; letter-spacing: -.045em; }
+    .detail-head p { margin: 0; color: var(--muted); font-size: 13px; font-weight: 760; line-height: 1.5; }
+    .detail-body { display: grid; gap: 14px; padding: 18px; }
+    .detail-card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: rgba(248,250,252,.72);
+    }
+    .detail-card h3 {
+      margin: 0 0 13px;
+      font-size: 16px;
+      letter-spacing: -.035em;
+    }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .info {
+      padding: 11px;
+      border: 1px solid rgba(148,163,184,.2);
+      border-radius: 14px;
+      background: #fff;
+    }
+    .info span { display: block; color: var(--muted); font-size: 11px; font-weight: 950; text-transform: uppercase; letter-spacing: .05em; }
+    .info b { display: block; margin-top: 5px; font-size: 14px; word-break: break-word; }
+
+    .form-grid { display: grid; gap: 12px; }
+    .form-grid.two { grid-template-columns: 1fr 1fr; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .timeline { display: grid; gap: 8px; }
+    .timeline-item {
+      position: relative;
+      padding: 10px 11px 10px 34px;
+      border: 1px solid rgba(148,163,184,.2);
+      border-radius: 14px;
+      background: #fff;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 720;
+      line-height: 1.45;
+    }
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: 13px;
+      top: 15px;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--primary);
+    }
+
+    .settings-code {
+      overflow: auto;
+      padding: 14px;
+      border-radius: 16px;
+      background: #0f172a;
+      color: #dbeafe;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .toast-wrap {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      display: grid;
+      gap: 10px;
+    }
+    .toast {
+      max-width: min(420px, calc(100vw - 36px));
+      padding: 13px 15px;
+      border-radius: 16px;
+      color: #fff;
+      background: #0f172a;
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      font-weight: 830;
+      line-height: 1.45;
+    }
+    .toast.error { background: #b91c1c; }
+    .toast.success { background: #15803d; }
+
+    .mobile-detail-close { display: none; }
+
+    @media (max-width: 1180px) {
+      .app-shell { grid-template-columns: 240px minmax(0, 1fr); }
+      .detail-panel {
+        position: fixed;
+        inset: 0 0 0 auto;
+        z-index: 40;
+        width: min(430px, 100%);
+        transform: translateX(104%);
+        transition: transform 220ms var(--ease);
+        box-shadow: var(--shadow);
+      }
+      .detail-panel.open { transform: translateX(0); }
+      .mobile-detail-close { display: inline-flex; }
+    }
+
+    @media (max-width: 860px) {
+      .login-view { grid-template-columns: 1fr; }
+      .login-visual { display: none; }
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .nav { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .main { padding: 18px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .top-actions { justify-content: flex-start; }
+      .search-row, .metric-grid, .panel-grid { grid-template-columns: 1fr; }
+      .visual-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .login-panel { padding: 28px 20px; }
+      .nav { grid-template-columns: 1fr; }
+      .main { padding: 14px; }
+      .info-grid, .form-grid.two { grid-template-columns: 1fr; }
+      .detail-body { padding: 14px; }
+      .detail-head { padding: 18px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <section id="loginView" class="login-view">
+    <div class="login-panel">
+      <form id="loginForm" class="login-card">
+        <div class="brand"><span class="brand-mark">K</span><span>Kall CS Console</span></div>
+        <h1>회원과 예약을 계정 단위로 관리합니다.</h1>
+        <p>기존 CS 계정 또는 Firebase Auth 관리자 계정으로 로그인하면 Kall 사용자 프로필, 예치금, 요청, 결과 업데이트를 한 화면에서 관리할 수 있습니다.</p>
+        <div class="field">
+          <label for="loginEmail">관리자 ID 또는 이메일</label>
+          <input id="loginEmail" autocomplete="username" placeholder="admin 또는 admin@email.com" required>
+        </div>
+        <div class="field">
+          <label for="loginPassword">비밀번호</label>
+          <input id="loginPassword" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-primary" type="submit">관리자 로그인</button>
+        <div id="loginError" class="login-error"></div>
+      </form>
+    </div>
+    <div class="login-visual">
+      <div class="login-visual-card">
+        <h2>Kall Reservation Ops</h2>
+        <p>접수된 회원, 예치금, 예약 요청, 결과 메시지가 `/users/{uid}` 기준으로 연결됩니다. CS가 저장한 결과는 고객 마이페이지에 바로 반영됩니다.</p>
+        <div class="visual-grid">
+          <div class="visual-metric"><strong>Members</strong><span>프로필과 국가, 선호 언어</span></div>
+          <div class="visual-metric"><strong>Wallet</strong><span>충전, 차감, 환불 이력</span></div>
+          <div class="visual-metric"><strong>Results</strong><span>예약 상태와 어시스턴트 메모</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="appView" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">K</span><span>Kall CS</span></div>
+      <div class="side-status">
+        <div class="status-line"><span><i id="firebaseDot" class="dot"></i>Firebase</span><b id="firebaseStatus">연결 준비</b></div>
+        <div class="status-line"><span>Realtime DB</span><b id="dbPathLabel">/users</b></div>
+      </div>
+      <nav class="nav" aria-label="CS navigation">
+        <button class="nav-btn active" type="button" data-page="dashboard">대시보드 <span id="navTotal" class="nav-badge">0</span></button>
+        <button class="nav-btn" type="button" data-page="requests">요청 관리 <span id="navRequests" class="nav-badge">0</span></button>
+        <button class="nav-btn" type="button" data-page="members">회원 관리 <span id="navMembers" class="nav-badge">0</span></button>
+        <button class="nav-btn" type="button" data-page="wallets">예치금 <span id="navWallets" class="nav-badge">0</span></button>
+        <button class="nav-btn" type="button" data-page="settings">설정 <span class="nav-badge">DB</span></button>
+      </nav>
+      <div class="side-footer">
+        <div class="admin-card">
+          <strong id="adminName">관리자</strong>
+          <span id="adminEmail">-</span>
+        </div>
+        <button id="logoutBtn" class="btn btn-ghost" type="button">로그아웃</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">대시보드</h1>
+          <p id="pageSubtitle">회원, 예약 요청, 예치금 변동을 실시간으로 확인합니다.</p>
+        </div>
+        <div class="top-actions">
+          <button id="refreshBtn" class="btn btn-ghost" type="button">새로고침</button>
+          <button id="demoDataBtn" class="btn btn-ghost" type="button">더미 데이터 숨기기</button>
+          <button id="seedDemoBtn" class="btn btn-ghost" type="button">더미 Firebase 저장</button>
+          <button id="openSettingsBtn" class="btn btn-dark" type="button">Rules 안내</button>
+        </div>
+      </header>
+
+      <div class="search-row" id="filterRow">
+        <input id="searchInput" placeholder="회원명, 이메일, 요청 ID, 예매처, 요약 검색">
+        <select id="statusFilter" aria-label="상태 필터">
+          <option value="">상태 전체</option>
+          <option value="Pending">대기</option>
+          <option value="In Progress">진행 중</option>
+          <option value="Confirmed">확정</option>
+          <option value="Completed">완료</option>
+          <option value="Cancelled">취소</option>
+        </select>
+        <select id="categoryFilter" aria-label="카테고리 필터">
+          <option value="">카테고리 전체</option>
+        </select>
+        <select id="urgencyFilter" aria-label="긴급도 필터">
+          <option value="">긴급도 전체</option>
+          <option value="Normal">Normal</option>
+          <option value="Today">Today</option>
+          <option value="Urgent">Urgent</option>
+        </select>
+      </div>
+
+      <section id="dashboardPage" class="page active">
+        <div id="metricGrid" class="metric-grid"></div>
+        <div class="panel-grid">
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>처리 우선 요청</h2><p>대기, 진행 중, 결과 업데이트가 필요한 요청입니다.</p></div>
+              <button class="btn btn-small btn-ghost" type="button" data-page-shortcut="requests">전체 보기</button>
+            </div>
+            <div id="priorityList" class="panel-body cards-list"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>예치금 주의 회원</h2><p>잔액 부족 또는 사용 이력이 큰 회원을 확인합니다.</p></div>
+              <button class="btn btn-small btn-ghost" type="button" data-page-shortcut="wallets">예치금 보기</button>
+            </div>
+            <div id="walletAlertList" class="panel-body cards-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="requestsPage" class="page">
+        <section class="table-card">
+          <div class="panel-head">
+            <div><h2>요청 관리</h2><p>고객 마이페이지의 예약 상세와 직접 연결되는 요청 목록입니다.</p></div>
+            <span id="requestCountLabel" class="badge progress">0건</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>요청 ID</th>
+                  <th>회원</th>
+                  <th>카테고리</th>
+                  <th>요약</th>
+                  <th>상태</th>
+                  <th>희망일</th>
+                  <th>예치금</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody id="requestsTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="membersPage" class="page">
+        <section class="table-card">
+          <div class="panel-head">
+            <div><h2>회원 관리</h2><p>Firebase `/users/{uid}/profile`, wallet, requests를 회원별로 합산합니다.</p></div>
+            <span id="memberCountLabel" class="badge confirmed">0명</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>회원</th>
+                  <th>국가/언어</th>
+                  <th>권한</th>
+                  <th>현재 예치금</th>
+                  <th>요청</th>
+                  <th>완료</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody id="membersTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="walletsPage" class="page">
+        <section class="table-card">
+          <div class="panel-head">
+            <div><h2>예치금 관리</h2><p>회원별 충전액, 사용액, 잔액을 확인하고 필요 시 운영 조정을 적용합니다.</p></div>
+            <span id="walletTotalLabel" class="badge confirmed">₩0</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>회원</th>
+                  <th>현재 잔액</th>
+                  <th>총 충전</th>
+                  <th>총 사용</th>
+                  <th>최근 이력</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody id="walletsTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="settingsPage" class="page">
+        <div class="panel-grid">
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>연동 구조</h2><p>index_v6.html과 동일한 Realtime Database 구조를 사용합니다.</p></div>
+            </div>
+            <div class="panel-body">
+              <div class="info-grid">
+                <div class="info"><span>회원 프로필</span><b>/users/{uid}/profile</b></div>
+                <div class="info"><span>예치금</span><b>/users/{uid}/wallet</b></div>
+                <div class="info"><span>예약 요청</span><b>/users/{uid}/requests/{requestId}</b></div>
+                <div class="info"><span>사용 이력</span><b>/users/{uid}/usageHistory/{historyId}</b></div>
+              </div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>권장 Rules</h2><p>admin, staff, cs role 계정만 전체 `/users` 읽기/쓰기를 허용합니다.</p></div>
+            </div>
+            <div class="panel-body">
+              <pre class="settings-code">{
+  "rules": {
+    "users": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('profile').child('role').val() === 'admin' || root.child('users').child(auth.uid).child('profile').child('role').val() === 'staff' || root.child('users').child(auth.uid).child('profile').child('role').val() === 'cs')",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('profile').child('role').val() === 'admin' || root.child('users').child(auth.uid).child('profile').child('role').val() === 'staff' || root.child('users').child(auth.uid).child('profile').child('role').val() === 'cs')",
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('profile').child('role').val() === 'admin' || root.child('users').child(auth.uid).child('profile').child('role').val() === 'staff' || root.child('users').child(auth.uid).child('profile').child('role').val() === 'cs')"
+      }
+    }
+  }
+}</pre>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <aside id="detailPanel" class="detail-panel" aria-label="상세 관리 패널">
+      <div class="detail-empty">
+        <div>
+          <h3>요청 또는 회원을 선택하세요</h3>
+          <p>결과 업데이트, 예치금 차감, 충전 적용은 이 패널에서 처리합니다.</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      get,
+      onValue,
+      push,
+      update,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcWWLiYxvKB8_9gaahW5fwyBavgO-AZQ8",
+      authDomain: "equipment-a6a8c.firebaseapp.com",
+      databaseURL: "https://equipment-a6a8c-default-rtdb.firebaseio.com",
+      projectId: "equipment-a6a8c",
+      storageBucket: "equipment-a6a8c.firebasestorage.app",
+      messagingSenderId: "816613863838",
+      appId: "1:816613863838:web:48dcd792f528e1c53a268f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const state = {
+      page: "dashboard",
+      authUser: null,
+      adminProfile: null,
+      legacyAuth: false,
+      members: [],
+      requests: [],
+      selectedRequestKey: "",
+      selectedMemberUid: "",
+      detailMode: "",
+      useDemoData: true,
+      filters: {
+        search: "",
+        status: "",
+        category: "",
+        urgency: ""
+      },
+      usersConnected: false,
+      unsubscribeUsers: null
+    };
+
+    const statusOptions = [
+      { value: "Pending", label: "대기", badge: "pending" },
+      { value: "In Progress", label: "진행 중", badge: "progress" },
+      { value: "Confirmed", label: "확정", badge: "confirmed" },
+      { value: "Completed", label: "완료", badge: "completed" },
+      { value: "Cancelled", label: "취소", badge: "cancelled" }
+    ];
+
+    const urgencyMultipliers = { Normal: 1, Today: 1.3, Urgent: 1.6 };
+    const serviceFees = {
+      "Concert / Tickets": 20000,
+      Restaurant: 10000,
+      "Clinic / Beauty": 15000,
+      "Travel / Hotel": 12000,
+      "Shopping / Delivery": 8000,
+      "Local Life": 12000,
+      "Emergency Support": 30000
+    };
+
+    const demoUsers = {
+      demo_yuna: {
+        profile: {
+          uid: "demo_yuna",
+          name: "Yuna T.",
+          email: "yuna.taiwan@example.com",
+          preferredLanguage: "zh",
+          country: "Taiwan",
+          countryCode: "TW",
+          role: "user",
+          createdAtISO: "2026-05-12T08:20:00.000Z"
+        },
+        wallet: {
+          balanceKRW: 44000,
+          totalChargedKRW: 70000,
+          totalUsedKRW: 26000,
+          currency: "KRW",
+          updatedAtISO: "2026-05-18T09:50:00.000Z"
+        },
+        requests: {
+          demo_req_1048: {
+            id: "#1048",
+            category: "Concert / Tickets",
+            urgency: "Today",
+            summary: "BLACKPINK ticket booking agency request",
+            place: "Ticket Office",
+            phone: "1544-0000",
+            preferredDate: "2026-05-22",
+            preferredTime: "15:00",
+            preferredContactChannel: "LINE",
+            contactId: "yuna.tw",
+            location: "Seoul concert venue",
+            memo: "예매처에 외국 여권 본인 인증과 좌석 예매 가능 여부를 확인해 주세요.",
+            status: "Confirmed",
+            estimatedAmountKRW: 26000,
+            usedAmountKRW: 26000,
+            assistantNote: "예매처 확인 완료. 외국 여권 인증 가능하며, 예매 번호와 여권 영문명이 일치해야 합니다.",
+            resultMessage: "예매처 확인 완료. 외국 여권 인증 가능하며, 예매 번호와 여권 영문명이 일치해야 합니다.",
+            reservationDate: "2026-05-22",
+            reservationTime: "15:00",
+            timeline: ["Request submitted", "Ticket office reached", "Booking requirement confirmed"],
+            createdAtISO: "2026-05-18T09:30:00.000Z"
+          }
+        },
+        usageHistory: {
+          demo_h_1: {
+            id: "demo_h_1",
+            type: "charge",
+            title: "Travel Deposit charge",
+            amountKRW: 70000,
+            requestId: "",
+            createdAtISO: "2026-05-12T08:25:00.000Z",
+            balanceAfterKRW: 70000
+          },
+          demo_h_2: {
+            id: "demo_h_2",
+            type: "use",
+            title: "Concert ticket booking support",
+            amountKRW: -26000,
+            requestId: "#1048",
+            createdAtISO: "2026-05-18T09:50:00.000Z",
+            balanceAfterKRW: 44000
+          }
+        }
+      },
+      demo_haruka: {
+        profile: {
+          uid: "demo_haruka",
+          name: "Haruka M.",
+          email: "haruka.jp@example.com",
+          preferredLanguage: "ja",
+          country: "Japan",
+          countryCode: "JP",
+          role: "user",
+          createdAtISO: "2026-05-10T11:10:00.000Z"
+        },
+        wallet: {
+          balanceKRW: 58500,
+          totalChargedKRW: 70000,
+          totalUsedKRW: 11500,
+          currency: "KRW",
+          updatedAtISO: "2026-05-16T10:10:00.000Z"
+        },
+        requests: {
+          demo_req_1042: {
+            id: "#1042",
+            category: "Restaurant",
+            urgency: "Normal",
+            summary: "Dinner reservation at Itaewon steakhouse",
+            place: "Itaewon Steakhouse",
+            phone: "02-000-0000",
+            preferredDate: "2026-05-22",
+            preferredTime: "19:30",
+            preferredContactChannel: "Email",
+            contactId: "haruka.jp@example.com",
+            location: "Itaewon",
+            memo: "창가 좌석 가능 여부와 알레르기 메모 전달을 요청합니다.",
+            status: "Completed",
+            estimatedAmountKRW: 10000,
+            usedAmountKRW: 10000,
+            assistantNote: "예약 완료. 2명, 19:30, 알레르기 메모 전달 완료.",
+            resultMessage: "예약 완료. 2명, 19:30, 알레르기 메모 전달 완료.",
+            reservationDate: "2026-05-22",
+            reservationTime: "19:30",
+            timeline: ["Request submitted", "Restaurant contacted", "Reservation completed"],
+            createdAtISO: "2026-05-15T13:05:00.000Z"
+          },
+          demo_req_1046: {
+            id: "#1046",
+            category: "Clinic / Beauty",
+            urgency: "Today",
+            summary: "Dermatology appointment in Gangnam",
+            place: "Gangnam Skin Clinic",
+            phone: "02-111-2222",
+            preferredDate: "2026-05-25",
+            preferredTime: "10:00",
+            preferredContactChannel: "WhatsApp",
+            contactId: "+81-90-0000-0000",
+            location: "Gangnam",
+            memo: "영어 상담 가능 여부와 시술 가격을 확인해 주세요.",
+            status: "In Progress",
+            estimatedAmountKRW: 19500,
+            usedAmountKRW: 0,
+            assistantNote: "",
+            resultMessage: "",
+            timeline: ["Request submitted", "Clinic callback pending"],
+            createdAtISO: "2026-05-16T10:10:00.000Z"
+          }
+        },
+        usageHistory: {
+          demo_h_3: {
+            id: "demo_h_3",
+            type: "charge",
+            title: "Travel Deposit charge",
+            amountKRW: 70000,
+            requestId: "",
+            createdAtISO: "2026-05-10T11:15:00.000Z",
+            balanceAfterKRW: 70000
+          },
+          demo_h_4: {
+            id: "demo_h_4",
+            type: "use",
+            title: "Restaurant reservation support",
+            amountKRW: -10000,
+            requestId: "#1042",
+            createdAtISO: "2026-05-15T13:40:00.000Z",
+            balanceAfterKRW: 60000
+          }
+        }
+      },
+      demo_chris: {
+        profile: {
+          uid: "demo_chris",
+          name: "Chris W.",
+          email: "chris.usa@example.com",
+          preferredLanguage: "en",
+          country: "United States",
+          countryCode: "US",
+          role: "user",
+          createdAtISO: "2026-05-08T07:35:00.000Z"
+        },
+        wallet: {
+          balanceKRW: 150000,
+          totalChargedKRW: 150000,
+          totalUsedKRW: 0,
+          currency: "KRW",
+          updatedAtISO: "2026-05-08T07:40:00.000Z"
+        },
+        requests: {
+          demo_req_1051: {
+            id: "#1051",
+            category: "Travel / Hotel",
+            urgency: "Urgent",
+            summary: "Hotel late check-in confirmation",
+            place: "Myeongdong Hotel",
+            phone: "02-333-4444",
+            preferredDate: "2026-05-20",
+            preferredTime: "22:30",
+            preferredContactChannel: "KakaoTalk",
+            contactId: "chrisw",
+            location: "Myeongdong",
+            memo: "늦은 체크인과 여권 사본 필요 여부를 확인해 주세요.",
+            status: "Pending",
+            estimatedAmountKRW: 19200,
+            usedAmountKRW: 0,
+            assistantNote: "",
+            resultMessage: "",
+            timeline: ["Request submitted"],
+            createdAtISO: "2026-05-19T05:10:00.000Z"
+          }
+        },
+        usageHistory: {
+          demo_h_5: {
+            id: "demo_h_5",
+            type: "charge",
+            title: "Premium Deposit charge",
+            amountKRW: 150000,
+            requestId: "",
+            createdAtISO: "2026-05-08T07:40:00.000Z",
+            balanceAfterKRW: 150000
+          }
+        }
+      }
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        "\"": "&quot;"
+      }[char]));
+    }
+
+    function formatMoney(value) {
+      const amount = Math.round(Number(value || 0));
+      const sign = amount < 0 ? "-" : "";
+      return `${sign}₩${Math.abs(amount).toLocaleString("ko-KR")}`;
+    }
+
+    function formatDate(value) {
+      if (!value) return "-";
+      const date = typeof value === "number" ? new Date(value) : new Date(String(value));
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toLocaleString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function shortDate(value) {
+      if (!value) return "-";
+      const date = typeof value === "number" ? new Date(value) : new Date(String(value));
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit" });
+    }
+
+    function statusMeta(status) {
+      const raw = String(status || "Pending");
+      return statusOptions.find((item) => item.value === raw) || statusOptions[0];
+    }
+
+    function requestDateText(req) {
+      return [req.preferredDate || req.reservationDate, req.preferredTime || req.reservationTime].filter(Boolean).join(" ") || "-";
+    }
+
+    function timelineArray(value) {
+      if (Array.isArray(value)) return value.filter(Boolean);
+      if (value && typeof value === "object") return Object.values(value).filter(Boolean);
+      return [];
+    }
+
+    function estimatedFee(category, urgency) {
+      const base = serviceFees[category] || 10000;
+      const multiplier = urgencyMultipliers[urgency] || 1;
+      return Math.round(base * multiplier);
+    }
+
+    function isAdminRole(role) {
+      return ["admin", "ADMIN", "staff", "STAFF", "cs", "CS"].includes(String(role || ""));
+    }
+
+    function showToast(message, type = "") {
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      $("#toastWrap").appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(8px)";
+        setTimeout(() => toast.remove(), 220);
+      }, 3200);
+    }
+
+    function setConnection(status, text) {
+      const dot = $("#firebaseDot");
+      dot.classList.remove("live", "error");
+      if (status) dot.classList.add(status);
+      $("#firebaseStatus").textContent = text;
+    }
+
+    function normalizeMember(uid, data = {}, source = "firebase") {
+      const profile = data.profile || {};
+      const wallet = data.wallet || {};
+      const requests = data.requests || {};
+      const usageHistory = data.usageHistory || {};
+      const requestList = Object.entries(requests).map(([key, value]) => ({ key, ...(value || {}) }));
+      const completed = requestList.filter((req) => ["Confirmed", "Completed"].includes(req.status)).length;
+      const active = requestList.filter((req) => ["Pending", "In Progress"].includes(req.status)).length;
+      return {
+        uid,
+        source,
+        profile,
+        wallet: {
+          balanceKRW: Number(wallet.balanceKRW || 0),
+          totalChargedKRW: Number(wallet.totalChargedKRW || 0),
+          totalUsedKRW: Number(wallet.totalUsedKRW || 0),
+          currency: wallet.currency || "KRW",
+          updatedAtISO: wallet.updatedAtISO || ""
+        },
+        usageHistory,
+        name: profile.name || profile.email?.split("@")[0] || "Kall User",
+        email: profile.email || "",
+        country: profile.country || "-",
+        countryCode: profile.countryCode || "",
+        language: profile.preferredLanguage || "en",
+        role: profile.role || "user",
+        requestCount: requestList.length,
+        activeCount: active,
+        completedCount: completed,
+        recentHistory: Object.values(usageHistory || {}).sort((a, b) => String(b.createdAtISO || "").localeCompare(String(a.createdAtISO || "")))[0] || null,
+        raw: data
+      };
+    }
+
+    function normalizeRequest(member, key, req = {}) {
+      return {
+        ...req,
+        uid: member.uid,
+        source: member.source || "firebase",
+        userName: member.name,
+        userEmail: member.email,
+        userCountry: member.country,
+        userLanguage: member.language,
+        key,
+        rowKey: `${member.uid}:${key}`,
+        id: req.id || key,
+        status: req.status || "Pending",
+        category: req.category || "-",
+        urgency: req.urgency || "Normal",
+        summary: req.summary || req.memo || "-",
+        place: req.place || "-",
+        estimatedAmountKRW: Number(req.estimatedAmountKRW || estimatedFee(req.category, req.urgency)),
+        usedAmountKRW: Number(req.usedAmountKRW || 0),
+        createdAtISO: req.createdAtISO || ""
+      };
+    }
+
+    function flattenRequests(members) {
+      return members.flatMap((member) => {
+        const requests = member.raw?.requests || {};
+        return Object.entries(requests).map(([key, req]) => normalizeRequest(member, key, req || {}));
+      }).sort((a, b) => String(b.createdAtISO || "").localeCompare(String(a.createdAtISO || "")));
+    }
+
+    function demoMembers() {
+      return Object.entries(demoUsers).map(([uid, value]) => normalizeMember(uid, value, "demo"));
+    }
+
+    function activeMembers() {
+      if (!state.useDemoData) return state.members;
+      const liveUids = new Set(state.members.map((member) => member.uid));
+      const samples = demoMembers().filter((member) => !liveUids.has(member.uid));
+      return [...state.members, ...samples];
+    }
+
+    function activeRequests() {
+      return flattenRequests(activeMembers());
+    }
+
+    function filteredRequests() {
+      const q = state.filters.search.trim().toLowerCase();
+      return activeRequests().filter((req) => {
+        const haystack = [
+          req.id, req.userName, req.userEmail, req.category, req.summary,
+          req.place, req.phone, req.preferredContactChannel, req.contactId
+        ].join(" ").toLowerCase();
+        return (!q || haystack.includes(q))
+          && (!state.filters.status || req.status === state.filters.status)
+          && (!state.filters.category || req.category === state.filters.category)
+          && (!state.filters.urgency || req.urgency === state.filters.urgency);
+      });
+    }
+
+    function summary() {
+      const members = activeMembers();
+      const requests = activeRequests();
+      const active = requests.filter((req) => ["Pending", "In Progress"].includes(req.status)).length;
+      const completed = requests.filter((req) => ["Confirmed", "Completed"].includes(req.status)).length;
+      const cancelled = requests.filter((req) => req.status === "Cancelled").length;
+      const balance = members.reduce((sum, member) => sum + Number(member.wallet.balanceKRW || 0), 0);
+      const used = members.reduce((sum, member) => sum + Number(member.wallet.totalUsedKRW || 0), 0);
+      const charged = members.reduce((sum, member) => sum + Number(member.wallet.totalChargedKRW || 0), 0);
+      return { active, completed, cancelled, balance, used, charged, members: members.length, requests: requests.length };
+    }
+
+    function renderAll() {
+      renderShell();
+      renderFilters();
+      renderDashboard();
+      renderRequestsTable();
+      renderMembersTable();
+      renderWalletsTable();
+      renderDetail();
+    }
+
+    function renderShell() {
+      const s = summary();
+      $("#navTotal").textContent = s.requests;
+      $("#navRequests").textContent = s.active;
+      $("#navMembers").textContent = s.members;
+      $("#navWallets").textContent = formatMoney(s.balance).replace("₩", "");
+      $$(".nav-btn").forEach((button) => button.classList.toggle("active", button.dataset.page === state.page));
+      $$(".page").forEach((page) => page.classList.remove("active"));
+      $(`#${state.page}Page`)?.classList.add("active");
+      const titles = {
+        dashboard: ["대시보드", "회원, 예약 요청, 예치금 변동을 실시간으로 확인합니다."],
+        requests: ["요청 관리", "고객 마이페이지에 반영될 예약 결과를 업데이트합니다."],
+        members: ["회원 관리", "회원 프로필, 요청 수, 예치금 상태를 계정 단위로 확인합니다."],
+        wallets: ["예치금 관리", "계정별 충전, 차감, 환불 이력을 운영 기준으로 관리합니다."],
+        settings: ["Firebase 설정", "CS 콘솔이 접근할 Realtime Database 경로와 Rules를 확인합니다."]
+      };
+      $("#pageTitle").textContent = titles[state.page][0];
+      $("#pageSubtitle").textContent = titles[state.page][1];
+      $("#filterRow").classList.toggle("hidden", state.page === "settings" || state.page === "dashboard");
+      $("#adminName").textContent = state.adminProfile?.name || "관리자";
+      $("#adminEmail").textContent = state.authUser?.email || state.authUser?.id || "-";
+      $("#demoDataBtn").textContent = state.useDemoData ? "더미 데이터 숨기기" : "더미 데이터 보기";
+    }
+
+    function renderFilters() {
+      const categories = [...new Set(activeRequests().map((req) => req.category).filter(Boolean))].sort();
+      const current = $("#categoryFilter").value;
+      $("#categoryFilter").innerHTML = `<option value="">카테고리 전체</option>${categories.map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("")}`;
+      $("#categoryFilter").value = categories.includes(current) ? current : "";
+    }
+
+    function renderDashboard() {
+      const s = summary();
+      const cards = [
+        ["회원", `${s.members.toLocaleString("ko-KR")}명`, "Firebase Auth 계정과 연결된 프로필"],
+        ["진행 요청", `${s.active.toLocaleString("ko-KR")}건`, "대기 또는 진행 중"],
+        ["현재 예치금", formatMoney(s.balance), `총 충전 ${formatMoney(s.charged)}`],
+        ["총 사용액", formatMoney(s.used), `완료 ${s.completed}건 · 취소 ${s.cancelled}건`]
+      ];
+      $("#metricGrid").innerHTML = cards.map(([label, value, detail]) => `
+        <article class="metric-card">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value)}</strong>
+          <small>${escapeHtml(detail)}</small>
+        </article>
+      `).join("");
+
+      const priority = activeRequests()
+        .filter((req) => ["Pending", "In Progress"].includes(req.status))
+        .slice(0, 6);
+      $("#priorityList").innerHTML = priority.length ? priority.map((req) => queueItem(req)).join("") : emptyBlock("처리할 요청이 없습니다.");
+
+      const walletAlerts = [...activeMembers()]
+        .sort((a, b) => Number(a.wallet.balanceKRW || 0) - Number(b.wallet.balanceKRW || 0))
+        .slice(0, 6);
+      $("#walletAlertList").innerHTML = walletAlerts.length ? walletAlerts.map((member) => `
+        <article class="queue-item" data-member-row="${escapeHtml(member.uid)}">
+          <div class="queue-top">
+            <h4>${escapeHtml(member.name)}</h4>
+            <span class="badge ${member.wallet.balanceKRW < 10000 ? "pending" : "confirmed"}">${formatMoney(member.wallet.balanceKRW)}</span>
+          </div>
+          <p>${escapeHtml(member.email || "-")} · 요청 ${member.requestCount}건 · 사용 ${formatMoney(member.wallet.totalUsedKRW)}${member.source === "demo" ? " · 샘플" : ""}</p>
+        </article>
+      `).join("") : emptyBlock("표시할 회원이 없습니다.");
+    }
+
+    function queueItem(req) {
+      const meta = statusMeta(req.status);
+      return `
+        <article class="queue-item" data-request-row="${escapeHtml(req.rowKey)}">
+          <div class="queue-top">
+            <h4>${escapeHtml(req.summary)}</h4>
+            <span class="badge ${meta.badge}">${meta.label}${req.source === "demo" ? " · 샘플" : ""}</span>
+          </div>
+          <p>${escapeHtml(req.userName)} · ${escapeHtml(req.category)} · ${escapeHtml(requestDateText(req))}</p>
+        </article>
+      `;
+    }
+
+    function emptyBlock(text) {
+      return `<div class="detail-card"><p class="muted" style="margin:0;font-weight:780;">${escapeHtml(text)}</p></div>`;
+    }
+
+    function renderRequestsTable() {
+      const rows = filteredRequests();
+      $("#requestCountLabel").textContent = `${rows.length.toLocaleString("ko-KR")}건`;
+      $("#requestsTable").innerHTML = rows.length ? rows.map((req) => {
+        const meta = statusMeta(req.status);
+        const selected = state.selectedRequestKey === req.rowKey && state.detailMode === "request";
+        return `
+          <tr data-row data-request-row="${escapeHtml(req.rowKey)}" class="${selected ? "selected" : ""}">
+            <td><strong>${escapeHtml(req.id)}</strong><br><span class="muted">${escapeHtml(req.urgency)}${req.source === "demo" ? " · 샘플" : ""}</span></td>
+            <td><strong>${escapeHtml(req.userName)}</strong><br><span class="muted">${escapeHtml(req.userEmail || "-")}</span></td>
+            <td>${escapeHtml(req.category)}</td>
+            <td><div class="truncate">${escapeHtml(req.summary)}</div><span class="muted">${escapeHtml(req.place || "-")}</span></td>
+            <td><span class="badge ${meta.badge}">${meta.label}</span></td>
+            <td class="nowrap">${escapeHtml(requestDateText(req))}</td>
+            <td><strong>${formatMoney(req.usedAmountKRW || req.estimatedAmountKRW)}</strong><br><span class="muted">예상 ${formatMoney(req.estimatedAmountKRW)}</span></td>
+            <td><button class="btn btn-small btn-ghost" type="button" data-request-row="${escapeHtml(req.rowKey)}">관리</button></td>
+          </tr>
+        `;
+      }).join("") : `<tr><td colspan="8">${emptyBlock("표시할 요청이 없습니다.")}</td></tr>`;
+    }
+
+    function renderMembersTable() {
+      const members = activeMembers();
+      $("#memberCountLabel").textContent = `${members.length.toLocaleString("ko-KR")}명`;
+      $("#membersTable").innerHTML = members.length ? members.map((member) => memberRow(member)).join("") : `<tr><td colspan="7">${emptyBlock("회원 데이터가 없습니다.")}</td></tr>`;
+    }
+
+    function memberRow(member) {
+      const selected = state.selectedMemberUid === member.uid && state.detailMode === "member";
+      return `
+        <tr data-row data-member-row="${escapeHtml(member.uid)}" class="${selected ? "selected" : ""}">
+          <td><strong>${escapeHtml(member.name)}</strong><br><span class="muted">${escapeHtml(member.email || "-")}${member.source === "demo" ? " · 샘플" : ""}</span></td>
+          <td>${escapeHtml(member.country)}<br><span class="muted">${escapeHtml(member.language)}</span></td>
+          <td><span class="badge ${member.role === "admin" ? "admin" : member.role === "staff" ? "staff" : "user"}">${escapeHtml(member.role)}</span></td>
+          <td><strong>${formatMoney(member.wallet.balanceKRW)}</strong></td>
+          <td>${member.requestCount}건<br><span class="muted">진행 ${member.activeCount}건</span></td>
+          <td>${member.completedCount}건</td>
+          <td><button class="btn btn-small btn-ghost" type="button" data-member-row="${escapeHtml(member.uid)}">관리</button></td>
+        </tr>
+      `;
+    }
+
+    function renderWalletsTable() {
+      const s = summary();
+      $("#walletTotalLabel").textContent = formatMoney(s.balance);
+      const members = activeMembers();
+      $("#walletsTable").innerHTML = members.length ? members.map((member) => `
+        <tr data-row data-member-row="${escapeHtml(member.uid)}">
+          <td><strong>${escapeHtml(member.name)}</strong><br><span class="muted">${escapeHtml(member.email || "-")}${member.source === "demo" ? " · 샘플" : ""}</span></td>
+          <td><strong>${formatMoney(member.wallet.balanceKRW)}</strong></td>
+          <td>${formatMoney(member.wallet.totalChargedKRW)}</td>
+          <td>${formatMoney(member.wallet.totalUsedKRW)}</td>
+          <td><span class="muted">${escapeHtml(member.recentHistory?.title || "-")}</span><br>${member.recentHistory ? formatMoney(member.recentHistory.amountKRW || 0) : ""}</td>
+          <td><button class="btn btn-small btn-ghost" type="button" data-member-row="${escapeHtml(member.uid)}">예치금 조정</button></td>
+        </tr>
+      `).join("") : `<tr><td colspan="6">${emptyBlock("예치금 데이터가 없습니다.")}</td></tr>`;
+    }
+
+    function renderDetail() {
+      if (state.detailMode === "request") {
+        const req = activeRequests().find((item) => item.rowKey === state.selectedRequestKey);
+        if (req) return renderRequestDetail(req);
+      }
+      if (state.detailMode === "member") {
+        const member = activeMembers().find((item) => item.uid === state.selectedMemberUid);
+        if (member) return renderMemberDetail(member);
+      }
+      $("#detailPanel").innerHTML = `
+        <div class="detail-empty">
+          <div>
+            <h3>요청 또는 회원을 선택하세요</h3>
+            <p>결과 업데이트, 예치금 차감, 충전 적용은 이 패널에서 처리합니다.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRequestDetail(req) {
+      const member = activeMembers().find((item) => item.uid === req.uid);
+      const meta = statusMeta(req.status);
+      const timeline = timelineArray(req.timeline);
+      $("#detailPanel").innerHTML = `
+        <div class="detail-head">
+          <div class="actions">
+            <span class="badge ${meta.badge}">${meta.label}${req.source === "demo" ? " · 샘플" : ""}</span>
+            <button class="btn btn-small btn-ghost mobile-detail-close" type="button" data-close-detail>닫기</button>
+          </div>
+          <h2>${escapeHtml(req.summary)}</h2>
+          <p>${escapeHtml(req.id)} · ${escapeHtml(req.userName)} · ${escapeHtml(req.category)}</p>
+        </div>
+        <div class="detail-body">
+          <section class="detail-card">
+            <h3>요청 정보</h3>
+            <div class="info-grid">
+              <div class="info"><span>회원</span><b>${escapeHtml(req.userName)}</b></div>
+              <div class="info"><span>이메일</span><b>${escapeHtml(req.userEmail || "-")}</b></div>
+              <div class="info"><span>업체/예매처</span><b>${escapeHtml(req.place || "-")}</b></div>
+              <div class="info"><span>연락처</span><b>${escapeHtml(req.phone || "-")}</b></div>
+              <div class="info"><span>희망일</span><b>${escapeHtml(requestDateText(req))}</b></div>
+              <div class="info"><span>예치금</span><b>${formatMoney(req.usedAmountKRW || req.estimatedAmountKRW)}</b></div>
+            </div>
+          </section>
+
+          <form id="resultForm" class="detail-card form-grid">
+            <h3>결과 업데이트</h3>
+            <div class="form-grid two">
+              <div class="field">
+                <label for="detailStatus">상태</label>
+                <select id="detailStatus">
+                  ${statusOptions.map((item) => `<option value="${item.value}" ${item.value === req.status ? "selected" : ""}>${item.label}</option>`).join("")}
+                </select>
+              </div>
+              <div class="field">
+                <label for="detailUsed">적용 예치금</label>
+                <input id="detailUsed" type="number" min="0" step="100" value="${Number(req.usedAmountKRW || req.estimatedAmountKRW || 0)}">
+              </div>
+              <div class="field">
+                <label for="detailReservationDate">확정 날짜</label>
+                <input id="detailReservationDate" type="date" value="${escapeHtml(req.reservationDate || req.preferredDate || "")}">
+              </div>
+              <div class="field">
+                <label for="detailReservationTime">확정 시간</label>
+                <input id="detailReservationTime" type="time" value="${escapeHtml(req.reservationTime || req.preferredTime || "")}">
+              </div>
+            </div>
+            <div class="field">
+              <label for="detailAssistantNote">고객 마이페이지 표시 메모</label>
+              <textarea id="detailAssistantNote" placeholder="고객이 마이페이지 예약 상세에서 볼 결과를 작성하세요.">${escapeHtml(req.assistantNote || req.resultMessage || "")}</textarea>
+            </div>
+            <div class="field">
+              <label for="detailTimelineNote">타임라인 추가</label>
+              <input id="detailTimelineNote" placeholder="예: 예매처 기준 확인 완료">
+            </div>
+            <div class="actions">
+              <button class="btn btn-ghost" type="button" data-member-row="${escapeHtml(req.uid)}">회원 보기</button>
+              <button class="btn btn-primary" type="submit">결과 저장 및 마이페이지 반영</button>
+            </div>
+          </form>
+
+          <section class="detail-card">
+            <h3>회원 예치금</h3>
+            <div class="info-grid">
+              <div class="info"><span>현재 잔액</span><b>${formatMoney(member?.wallet.balanceKRW || 0)}</b></div>
+              <div class="info"><span>총 사용액</span><b>${formatMoney(member?.wallet.totalUsedKRW || 0)}</b></div>
+            </div>
+          </section>
+
+          <section class="detail-card">
+            <h3>타임라인</h3>
+            <div class="timeline">${timeline.length ? timeline.map((item) => `<div class="timeline-item">${escapeHtml(item)}</div>`).join("") : `<div class="timeline-item">Request submitted</div>`}</div>
+          </section>
+        </div>
+      `;
+      $("#detailPanel").classList.add("open");
+      $("#resultForm").addEventListener("submit", saveRequestResult);
+    }
+
+    function renderMemberDetail(member) {
+      const memberRequests = activeRequests().filter((req) => req.uid === member.uid).slice(0, 8);
+      $("#detailPanel").innerHTML = `
+        <div class="detail-head">
+          <div class="actions">
+            <span class="badge ${member.role === "admin" ? "admin" : member.role === "staff" ? "staff" : "user"}">${escapeHtml(member.role)}${member.source === "demo" ? " · 샘플" : ""}</span>
+            <button class="btn btn-small btn-ghost mobile-detail-close" type="button" data-close-detail>닫기</button>
+          </div>
+          <h2>${escapeHtml(member.name)}</h2>
+          <p>${escapeHtml(member.email || "-")} · ${escapeHtml(member.country)} · ${escapeHtml(member.language)}</p>
+        </div>
+        <div class="detail-body">
+          <section class="detail-card">
+            <h3>회원 요약</h3>
+            <div class="info-grid">
+              <div class="info"><span>UID</span><b>${escapeHtml(member.uid)}</b></div>
+              <div class="info"><span>가입일</span><b>${formatDate(member.profile.createdAtISO || member.profile.createdAt)}</b></div>
+              <div class="info"><span>요청</span><b>${member.requestCount}건</b></div>
+              <div class="info"><span>완료</span><b>${member.completedCount}건</b></div>
+            </div>
+          </section>
+
+          <form id="walletAdjustForm" class="detail-card form-grid">
+            <h3>예치금 조정</h3>
+            <div class="info-grid">
+              <div class="info"><span>현재 잔액</span><b>${formatMoney(member.wallet.balanceKRW)}</b></div>
+              <div class="info"><span>총 충전 / 사용</span><b>${formatMoney(member.wallet.totalChargedKRW)} / ${formatMoney(member.wallet.totalUsedKRW)}</b></div>
+            </div>
+            <div class="form-grid two">
+              <div class="field">
+                <label for="walletAdjustType">처리 유형</label>
+                <select id="walletAdjustType">
+                  <option value="charge">예치금 충전 적용</option>
+                  <option value="use">예치금 사용 차감</option>
+                  <option value="refund">환불 차감</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="walletAdjustAmount">금액</label>
+                <input id="walletAdjustAmount" type="number" min="100" step="100" placeholder="예: 30000" required>
+              </div>
+            </div>
+            <div class="field">
+              <label for="walletAdjustMemo">이력 제목</label>
+              <input id="walletAdjustMemo" placeholder="예: 관리자 예치금 충전 적용">
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" type="submit">예치금 반영</button>
+            </div>
+          </form>
+
+          <section class="detail-card">
+            <h3>최근 요청</h3>
+            <div class="cards-list">
+              ${memberRequests.length ? memberRequests.map((req) => queueItem(req)).join("") : emptyBlock("요청이 없습니다.")}
+            </div>
+          </section>
+        </div>
+      `;
+      $("#detailPanel").classList.add("open");
+      $("#walletAdjustForm").addEventListener("submit", saveWalletAdjustment);
+    }
+
+    async function saveRequestResult(event) {
+      event.preventDefault();
+      const req = activeRequests().find((item) => item.rowKey === state.selectedRequestKey);
+      if (!req) return showToast("선택된 요청을 찾을 수 없습니다.", "error");
+      if (req.source === "demo") return showToast("더미 예약은 화면 테스트용입니다. 실제 저장은 Firebase 회원 예약에서 처리하세요.", "error");
+      const member = activeMembers().find((item) => item.uid === req.uid);
+      if (!member) return showToast("회원 정보를 찾을 수 없습니다.", "error");
+
+      const nextStatus = $("#detailStatus").value;
+      const nextUsed = Math.max(0, Math.round(Number($("#detailUsed").value || 0)));
+      const previousUsed = Number(req.usedAmountKRW || 0);
+      const delta = nextUsed - previousUsed;
+      const nextBalance = Number(member.wallet.balanceKRW || 0) - delta;
+      if (nextBalance < 0) {
+        showToast(`잔액 부족: 현재 ${formatMoney(member.wallet.balanceKRW)}, 추가 차감 ${formatMoney(delta)}입니다.`, "error");
+        return;
+      }
+
+      const note = $("#detailAssistantNote").value.trim();
+      const timeline = timelineArray(req.timeline);
+      const timelineNote = $("#detailTimelineNote").value.trim() || `CS result updated: ${statusMeta(nextStatus).label}`;
+      const now = new Date().toISOString();
+      const requestPath = `users/${req.uid}/requests/${req.key}`;
+      const updates = {
+        [`${requestPath}/status`]: nextStatus,
+        [`${requestPath}/reservationDate`]: $("#detailReservationDate").value,
+        [`${requestPath}/reservationTime`]: $("#detailReservationTime").value,
+        [`${requestPath}/assistantNote`]: note,
+        [`${requestPath}/resultMessage`]: note,
+        [`${requestPath}/usedAmountKRW`]: nextUsed,
+        [`${requestPath}/updatedAt`]: serverTimestamp(),
+        [`${requestPath}/updatedAtISO`]: now,
+        [`${requestPath}/timeline`]: [...timeline, timelineNote]
+      };
+
+      if (delta !== 0) {
+        const historyRef = push(ref(db, `users/${req.uid}/usageHistory`));
+        const type = delta > 0 ? "use" : "refund";
+        updates[`users/${req.uid}/wallet/balanceKRW`] = nextBalance;
+        updates[`users/${req.uid}/wallet/totalUsedKRW`] = Math.max(0, Number(member.wallet.totalUsedKRW || 0) + delta);
+        updates[`users/${req.uid}/wallet/updatedAt`] = serverTimestamp();
+        updates[`users/${req.uid}/wallet/updatedAtISO`] = now;
+        updates[`users/${req.uid}/usageHistory/${historyRef.key}`] = {
+          id: historyRef.key,
+          type,
+          title: delta > 0 ? `${req.category} request fee applied` : "Usage adjustment refund",
+          amountKRW: delta > 0 ? -delta : Math.abs(delta),
+          requestId: req.id,
+          createdAt: serverTimestamp(),
+          createdAtISO: now,
+          balanceAfterKRW: nextBalance
+        };
+      }
+
+      try {
+        await update(ref(db), updates);
+        showToast("결과와 예치금이 고객 마이페이지에 반영되었습니다.", "success");
+      } catch (error) {
+        console.error("Result update failed", error);
+        showToast(error.message || "결과 저장에 실패했습니다.", "error");
+      }
+    }
+
+    async function saveWalletAdjustment(event) {
+      event.preventDefault();
+      const member = activeMembers().find((item) => item.uid === state.selectedMemberUid);
+      if (!member) return showToast("회원을 먼저 선택하세요.", "error");
+      if (member.source === "demo") return showToast("더미 회원의 예치금은 화면 테스트용입니다. 실제 조정은 Firebase 회원에서 처리하세요.", "error");
+      const type = $("#walletAdjustType").value;
+      const amount = Math.max(0, Math.round(Number($("#walletAdjustAmount").value || 0)));
+      if (!amount) return showToast("금액을 입력하세요.", "error");
+
+      const sign = type === "charge" ? 1 : -1;
+      const nextBalance = Number(member.wallet.balanceKRW || 0) + amount * sign;
+      if (nextBalance < 0) return showToast("잔액보다 큰 금액은 차감할 수 없습니다.", "error");
+
+      const now = new Date().toISOString();
+      const historyRef = push(ref(db, `users/${member.uid}/usageHistory`));
+      const title = $("#walletAdjustMemo").value.trim()
+        || (type === "charge" ? "Admin deposit charge" : type === "refund" ? "Admin refund adjustment" : "Admin deposit use");
+      const updates = {
+        [`users/${member.uid}/wallet/balanceKRW`]: nextBalance,
+        [`users/${member.uid}/wallet/updatedAt`]: serverTimestamp(),
+        [`users/${member.uid}/wallet/updatedAtISO`]: now,
+        [`users/${member.uid}/usageHistory/${historyRef.key}`]: {
+          id: historyRef.key,
+          type,
+          title,
+          amountKRW: amount * sign,
+          requestId: "",
+          createdAt: serverTimestamp(),
+          createdAtISO: now,
+          balanceAfterKRW: nextBalance
+        }
+      };
+      if (type === "charge") updates[`users/${member.uid}/wallet/totalChargedKRW`] = Number(member.wallet.totalChargedKRW || 0) + amount;
+      if (type === "use") updates[`users/${member.uid}/wallet/totalUsedKRW`] = Number(member.wallet.totalUsedKRW || 0) + amount;
+
+      try {
+        await update(ref(db), updates);
+        showToast("예치금 조정 내역이 저장되었습니다.", "success");
+      } catch (error) {
+        console.error("Wallet adjustment failed", error);
+        showToast(error.message || "예치금 저장에 실패했습니다.", "error");
+      }
+    }
+
+    function selectRequest(rowKey) {
+      state.selectedRequestKey = rowKey;
+      state.selectedMemberUid = "";
+      state.detailMode = "request";
+      renderRequestsTable();
+      renderDetail();
+    }
+
+    function selectMember(uid) {
+      state.selectedMemberUid = uid;
+      state.selectedRequestKey = "";
+      state.detailMode = "member";
+      renderMembersTable();
+      renderWalletsTable();
+      renderDetail();
+    }
+
+    function setPage(page) {
+      state.page = page;
+      renderShell();
+      if (page === "requests") renderRequestsTable();
+      if (page === "members") renderMembersTable();
+      if (page === "wallets") renderWalletsTable();
+    }
+
+    async function bootstrapAdmin(user) {
+      state.legacyAuth = false;
+      state.authUser = user;
+      setConnection("", "권한 확인");
+      const profileSnap = await get(ref(db, `users/${user.uid}/profile`));
+      const profile = profileSnap.val() || {};
+      if (!isAdminRole(profile.role)) {
+        $("#loginError").style.display = "block";
+        $("#loginError").textContent = "관리자 권한이 없습니다. /users/{uid}/profile/role 값을 admin 또는 staff로 설정하세요.";
+        $("#loginView").classList.remove("hidden");
+        $("#appView").classList.add("hidden");
+        await signOut(auth);
+        return;
+      }
+      state.adminProfile = profile;
+      $("#loginView").classList.add("hidden");
+      $("#appView").classList.remove("hidden");
+      connectUsers();
+    }
+
+    function bootstrapLegacyAdmin() {
+      state.legacyAuth = true;
+      state.authUser = { uid: "legacy_admin", id: "admin", email: "admin" };
+      state.adminProfile = { uid: "legacy_admin", name: "관리자", email: "admin", role: "admin" };
+      $("#loginView").classList.add("hidden");
+      $("#appView").classList.remove("hidden");
+      connectUsers();
+      showToast("기존 CS 계정으로 로그인했습니다.", "success");
+    }
+
+    async function logoutAdmin() {
+      if (state.legacyAuth) {
+        state.legacyAuth = false;
+        state.authUser = null;
+        state.adminProfile = null;
+        state.members = [];
+        state.requests = [];
+        if (state.unsubscribeUsers) state.unsubscribeUsers();
+        state.unsubscribeUsers = null;
+        $("#loginView").classList.remove("hidden");
+        $("#appView").classList.add("hidden");
+        setConnection("", "연결 준비");
+        return;
+      }
+      await signOut(auth);
+    }
+
+    function connectUsers() {
+      if (state.unsubscribeUsers) state.unsubscribeUsers();
+      setConnection("", "연결 중");
+      state.unsubscribeUsers = onValue(ref(db, "users"), (snapshot) => {
+        const data = snapshot.val() || {};
+        state.members = Object.entries(data).map(([uid, value]) => normalizeMember(uid, value || {}))
+          .sort((a, b) => String(b.profile.createdAtISO || "").localeCompare(String(a.profile.createdAtISO || "")));
+        state.requests = flattenRequests(state.members);
+        state.usersConnected = true;
+        setConnection("live", "실시간 연결");
+        renderAll();
+      }, (error) => {
+        console.error("Users subscription failed", error);
+        state.usersConnected = false;
+        setConnection("error", "권한 필요");
+        renderAll();
+        showToast("Firebase Rules 때문에 /users 전체 읽기가 거부되었습니다. 설정 탭의 Rules를 적용하세요.", "error");
+      });
+    }
+
+    async function seedDemoDataToFirebase() {
+      const now = new Date().toISOString();
+      const updates = {};
+      Object.entries(demoUsers).forEach(([uid, data]) => {
+        updates[`users/${uid}`] = {
+          ...data,
+          profile: {
+            ...data.profile,
+            uid,
+            role: "user",
+            seeded: true,
+            seededAtISO: now
+          },
+          wallet: {
+            ...data.wallet,
+            updatedAtISO: data.wallet.updatedAtISO || now
+          }
+        };
+      });
+
+      try {
+        await update(ref(db), updates);
+        state.useDemoData = false;
+        renderAll();
+        showToast("더미 회원과 예약을 Firebase /users/demo_* 경로에 저장했습니다.", "success");
+      } catch (error) {
+        console.error("Demo seed failed", error);
+        showToast(error.message || "Firebase 더미 데이터 저장에 실패했습니다. Rules와 로그인 권한을 확인하세요.", "error");
+      }
+    }
+
+    function bindEvents() {
+      $("#loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        $("#loginError").style.display = "none";
+        const loginId = $("#loginEmail").value.trim();
+        const loginPw = $("#loginPassword").value;
+        if (loginId === "admin" && loginPw === "1234") {
+          bootstrapLegacyAdmin();
+          return;
+        }
+        try {
+          await signInWithEmailAndPassword(auth, loginId, loginPw);
+        } catch (error) {
+          console.error("Login failed", error);
+          $("#loginError").style.display = "block";
+          $("#loginError").textContent = "로그인에 실패했습니다. 기존 계정은 admin / 1234, Firebase 계정은 이메일 형식으로 입력하세요.";
+        }
+      });
+
+      $("#logoutBtn").addEventListener("click", logoutAdmin);
+      $("#refreshBtn").addEventListener("click", connectUsers);
+      $("#demoDataBtn").addEventListener("click", () => {
+        state.useDemoData = !state.useDemoData;
+        renderAll();
+        showToast(state.useDemoData ? "더미 데이터를 함께 표시합니다." : "Firebase 데이터만 표시합니다.", "success");
+      });
+      $("#seedDemoBtn").addEventListener("click", seedDemoDataToFirebase);
+      $("#openSettingsBtn").addEventListener("click", () => setPage("settings"));
+
+      document.addEventListener("click", (event) => {
+        const pageButton = event.target.closest("[data-page]");
+        if (pageButton) setPage(pageButton.dataset.page);
+        const shortcut = event.target.closest("[data-page-shortcut]");
+        if (shortcut) setPage(shortcut.dataset.pageShortcut);
+        const requestButton = event.target.closest("[data-request-row]");
+        if (requestButton) selectRequest(requestButton.dataset.requestRow);
+        const memberButton = event.target.closest("[data-member-row]");
+        if (memberButton) selectMember(memberButton.dataset.memberRow);
+        if (event.target.closest("[data-close-detail]")) $("#detailPanel").classList.remove("open");
+      });
+
+      ["searchInput", "statusFilter", "categoryFilter", "urgencyFilter"].forEach((id) => {
+        $(`#${id}`).addEventListener("input", () => {
+          state.filters.search = $("#searchInput").value;
+          state.filters.status = $("#statusFilter").value;
+          state.filters.category = $("#categoryFilter").value;
+          state.filters.urgency = $("#urgencyFilter").value;
+          renderRequestsTable();
+        });
+      });
+    }
+
+    bindEvents();
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        if (state.legacyAuth) return;
+        state.authUser = null;
+        state.adminProfile = null;
+        state.members = [];
+        state.requests = [];
+        if (state.unsubscribeUsers) state.unsubscribeUsers();
+        state.unsubscribeUsers = null;
+        $("#loginView").classList.remove("hidden");
+        $("#appView").classList.add("hidden");
+        setConnection("", "연결 준비");
+        return;
+      }
+      try {
+        await bootstrapAdmin(user);
+      } catch (error) {
+        console.error("Admin bootstrap failed", error);
+        $("#loginError").style.display = "block";
+        $("#loginError").textContent = error.message || "관리자 초기화에 실패했습니다.";
+      }
+    });
+  </script>
+</body>
+</html>
